@@ -1,12 +1,13 @@
 # The ChirpOS File System #
 
-The file system of ChirpOS is represented as an instance of an `io.FileSystem`
-object. This instance holds an `io.RootDirectory` object, which is mostly just a
+The file system of ChirpOS is represented as an instance of the `io.FileSystem`
+class. This instance holds an `io.RootDirectory` object, which is mostly just a
 regular directory without a parent. The root directory holds everything in the
-file system, which is made up of instances of the subclass `io.FileSystemNode`.
-Each of these objects is accessed by regular Javascript object keys(strings) in
-order to save time on lookups. The root directory can optionally have a name,
-like a drive letter would on Windows. By default, it has no name.
+file system, which is made up of instances of classes that inherit
+`io.FileSystemNode`. Each of these objects is accessed by regular Javascript
+object keys(strings) in order to save time on lookups. The root directory can
+optionally have a name, like a drive letter would on Windows. By default, it has
+no name.
 
 What a file system structure may look like in ChripOS:
 ```
@@ -57,7 +58,33 @@ save space, the JSON string will be compressed using the
 [lz-string library](http://pieroxy.net/blog/pages/lz-string/index.html).
 
 ### File Streams ###
-TODO
+Files are normally accessed and written to through `kernel.Kernel.write()`,
+which causes the local storage operations to occur. Doing local storage write
+operations constantly might be a bit slow, so the `io.FileStream` class provides
+an abstraction layer with a write buffer, plus it automatically calls the
+kernel's write method with the process ID of the process it is currently
+attached to. The stream should however, be instantiated by using the
+`process.Process.openFile()` method so as to automate the process of error
+checking or creating new files when necessary.
+
+This write buffer automatically flushes when it is full, and it also flushes
+when the `io.FileStream.close()` method is called when the stream is still
+open.
+
+The stream also acts as a buffered reader, but there is no performance reason
+for this since the file system is loaded into memory during startup and keeps
+any changes in memory instead of relying on local storage.
+
+### File Locking ###
+Read and write locks can be claimed by individual processes or by the kernel
+itself. Whenever data is about to be read or written, the kernel's write method
+must check for any existing locks by other processes before doing so. If the
+condition is true, then the method will error out. The error should be handled
+inside of the file stream's write method as well. All of this is to prevent any
+possible "race conditions"; where multiple processes read copies of one file
+into memory, and any of them overwrites changes made by the other.
+
+For more information, see the *File Locking* section in processes.md
 
 ### File System Module Class Hierarchy ###
 ```
