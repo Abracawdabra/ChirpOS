@@ -1,18 +1,23 @@
 # The ChirpOS File System #
 
 The file system of ChirpOS is represented as an instance of the `io.FileSystem`
-class. This instance holds an `io.RootDirectory` object, which is mostly just a
-regular directory without a parent. The root directory holds everything in the
-file system, which is made up of instances of classes that inherit
+class. This instance holds an `io.Directory` object; a regular directory, only
+with the file system being the parent. The root directory holds everything in
+the file system, which is made up of instances of classes that inherit
 `io.FileSystemNode`. Each of these objects is accessed by regular Javascript
 object keys(strings) in order to save time on lookups. The root directory can
 optionally have a name, like a drive letter would on Windows. By default, it has
 no name.
 
+In order to store regular object properties alongside filenames, each directory
+object will have a `_children` property which acts as the hash. This way, it is
+possible to not have to worry about the user naming a file "getPath" (for
+instance) and overwriting the actual `getPath` method of the parent object.
+
 What a file system structure may look like in ChripOS:
 ```
 io.FileSystem
-└─ io.RootDirectory
+└─ io.Directory (root)
    |── io.Directory
    |   |── io.Directory
    |   └── io.File
@@ -22,12 +27,6 @@ io.FileSystem
 ```
 
 ### Attributes ###
-Since filenames are stored as keys(or properties) within a directory object,
-this can cause issues with determining if a key actually refers to a regular
-property or a filename. A simple way around this problem is to prefix regular
-properties with a directory separator. Filenames cannot contain a directory
-separator in them because of the confusion they would cause in path strings.
-
  All `io.FileSystemNode` objects have attributes associated with them through an
  `io.FileSystemNodeInfo` object. Attributes that are stored are:
  + Name : string
@@ -71,10 +70,6 @@ This write buffer automatically flushes when it is full, and it also flushes
 when the `io.FileStream.close()` method is called when the stream is still
 open.
 
-The stream also acts as a buffered reader, but there is no performance reason
-for this since the file system is loaded into memory during startup and keeps
-any changes in memory instead of relying on local storage.
-
 ### File Locking ###
 Read and write locks can be claimed by individual processes or by the kernel
 itself. Whenever data is about to be read or written, the kernel's write method
@@ -91,9 +86,7 @@ For more information, see the *File Locking* section in processes.md
 io.FileSystem
 io.FileSystemInfo
 io.FileSystemNode
-└─ io.BaseDirectory
-|  └─ io.RootDirectory
-|  └─ io.Directory
+└─ io.Directory
 └─ io.File
 io.FileSystemNodeInfo
 io.FileStream

@@ -4,24 +4,50 @@
  * @license MIT
  */
 
-/**
- * All properties with a prefixed slash indicate that they start with a
- * directory separator. I'm not sure how you can make that a variable in a
- * TypeScript definition, so don't rely on "/info" (for example) being a
- * constant property name. Always use the get/set methods instead.
- */
+enum StatusCode {
+    SUCCESS,
+    PERMISSION_DENIED,
+    FILE_NOT_FOUND,
+    INVALID_PATH,
+    STREAM_NOT_IN_READ_MODE,
+    STREAM_NOT_IN_WRITE_MODE,
+    STREAM_IS_CLOSED,
+    FILE_IS_READ_LOCKED,
+    FILE_IS_WRITE_LOCKED
+}
+
+class StatusObject {
+    code: StatusCode;
+    result: any;
+
+    isSuccess(): boolean;
+    constructor(code: StatusCode, result?: any);
+}
+
+function getStatusMessage(status_code: StatusCode): string;
+function inheritClass(child_class: any, parent_class: any);
+
+module "utils" {
+    class ArrayUtils {
+        static areEqual(arr1: Array, arr2: Array): boolean;
+    }
+}
+
 module "io" {
     class FileSystem {
         info: FileSystemInfo;
         dirSeparator: string;
+        private _root: Directory;
 
-        constructor(info?: FileSystemInfo, dir_sep?: string) {}
+        getRoot(): Directory;
+        getNodeFromPath(path: string): FileSystemNode;
+        constructor(root_name: string, dir_sep?: string, info?: FileSystemInfo);
     }
 
     class FileSystemInfo {
-        name: string;
+        capacity: number;       // Number of characters in local storage
 
-        constructor(name?: string) {}
+        constructor(capacity?: number);
     }
 
     class FileSystemNodeInfo {
@@ -31,60 +57,59 @@ module "io" {
         accessed: number;
         flags: number;
 
-        constructor(name: string, created?: number, modified?: number, accessed?: number, flags?: number) {}
+        constructor(name: string, created?: number, modified?: number, accessed?: number, flags?: number);
+    }
+
+    enum FileSystemNodeFlag {
+        SYSTEM,
+        EXECUTABLE,
+        HIDDEN,
+        SUPER_HIDDEN
     }
 
     abstract class FileSystemNode {
-        private "/info": FileSystemNodeInfo;
+        private info: FileSystemNodeInfo;
+        parent: FileSystemNode;
 
-        getInfo(): FileSystemNodeInfo;
         getPath(): string;
-        getPathArray(): Array;
+        getPathNodes(): Array;
     }
 
-    // Useful for instanceof on directory types
-    abstract class BaseDirectory extends FileSystemNode {
-    }
+    class Directory extends FileSystemNode {
+        _children: Object;
 
-    class RootDirectory extends BaseDirectory {
-        private "/fileSystem": FileSystem;
-
-        getFileSystem(): FileSystem;
-        constructor(file_system: FileSystem, info?: FileSystemNodeInfo) {}
-    }
-
-    class Directory extends BaseDirectory {
-        private "/parent": BaseDirectory;
-
-        getParent(): BaseDirectory;
-        setParent(parent: BaseDirectory): void;
-        constructor(parent: BaseDirectory, info: FileSystemNodeInfo) {}
+        getNode(filename: string): StatusObject;
+        setNode(node: FileSystemNode, user_mode?: boolean): StatusCode;
+        deleteNode(filename: string, user_mode?: boolean): StatusCode;
+        constructor(parent: Directory, info: FileSystemNodeInfo);
     }
 
     class File extends FileSystemNode {
-        private "/data": string;
+        data: string;
 
-        getData(): string;
-        setData(data: string): void;
-        constructor(parent: BaseDirectory, info: FileSystemNodeInfo, data?: string) {}
+        constructor(parent: Directory, info: FileSystemNodeInfo, data?: string);
     }
 
     class FileStream {
         private _file: File;
-        private _processID: number;
+        private _pid: number;
         private _kernel: kernel.Kernel;
         private _mode: string;
         private _bufferSize: number;
+        private _buffer: string;
+        private _position: number;
+        private _isClosed: boolean;
 
+        close(): StatusCode;
         getBufferSize(): number;
         setBufferSize(size: number): void;
         getMode(): string;
-        read(chars?: number): global.StatusObject;
-        readLine(): global.StatusObject;
-        write(data: string): global.StatusCode;
-        writeLine(data: string): global.StatusCode;
-        flush(): global.StatusCode;
-        close(): global.StatusCode;
-        constructor(kernel: kernel.Kernel, process_id: number, file: File) {}
+        seek(pos: number): void;
+        read(chars?: number): StatusObject;
+        readLine(): StatusObject;
+        write(data: string): StatusCode;
+        writeLine(data: string): StatusCode;
+        flush(): StatusCode;
+        constructor(kernel: kernel.Kernel, pid: number, file: File, mode: string);
     }
 }
