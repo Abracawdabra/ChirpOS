@@ -122,6 +122,25 @@ QUnit.test("Delete files from system directory test", function(assert) {
     assert.equal(system_dir.getNode("test2.txt").result, test_file2);
 });
 
+QUnit.test("Setting flags test", function(assert) {
+    var fs = new io.FileSystem();
+    fs.dirSeparator = "/";
+
+    var root = fs.getRoot();
+    var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"));
+    test_file.setFlag(io.FileSystemNodeFlag.SYSTEM);
+    test_file.setFlag(io.FileSystemNodeFlag.EXECUTABLE);
+    assert.ok(test_file.hasFlag(io.FileSystemNodeFlag.SYSTEM), "Successfully set system flag");
+    assert.ok(test_file.hasFlag(io.FileSystemNodeFlag.EXECUTABLE), "Successfully set executable flag");
+
+    test_file.unsetFlag(io.FileSystemNodeFlag.SYSTEM);
+    assert.equal(test_file.hasFlag(io.FileSystemNodeFlag.SYSTEM), false);
+    test_file.unsetFlag(io.FileSystemNodeFlag.EXECUTABLE);
+    assert.equal(test_file.hasFlag(io.FileSystemNodeFlag.EXECUTABLE), false);
+
+    assert.equal(test_file.info.flags, 0);
+});
+
 QUnit.test("Read from file stream test", function(assert) {
     var fs = new io.FileSystem();
     fs.dirSeparator = "/";

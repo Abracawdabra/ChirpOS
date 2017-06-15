@@ -73,6 +73,9 @@ module "io" {
 
         getPath(): string;
         getPathNodes(): Array;
+        setFlag(flag: FileSystemNodeFlag);
+        unsetFlag(flag: FileSystemNodeFlag);
+        hasFlag(flag: FileSystemNodeFlag): boolean;
     }
 
     class Directory extends FileSystemNode {
