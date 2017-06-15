@@ -35,7 +35,7 @@ A process's environment is simply an ordinary Javascript object that acts as a
 hash of `env.Data` and `env.Function` objects. There are four data types to
 use work with:
 + Integer - Whole numbers between 9007199254740991 and -9007199254740991
-+ Floater - Floating point numbers
++ Float   - Floating point numbers
 + String  - Strings of characters
 + Array   - Arrays of data objects (literals are converted to objects)
 
