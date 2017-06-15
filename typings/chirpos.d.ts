@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-enum StatusCode {
+export enum StatusCode {
     SUCCESS,
     PERMISSION_DENIED,
     FILE_NOT_FOUND,
@@ -16,7 +16,7 @@ enum StatusCode {
     FILE_IS_WRITE_LOCKED
 }
 
-class StatusObject {
+export class StatusObject {
     code: StatusCode;
     result: any;
 
@@ -24,17 +24,17 @@ class StatusObject {
     constructor(code: StatusCode, result?: any);
 }
 
-function getStatusMessage(status_code: StatusCode): string;
-function inheritClass(child_class: any, parent_class: any);
+export function getStatusMessage(status_code: StatusCode): string;
+export function inheritClass(child_class: any, parent_class: any);
 
-module "utils" {
+declare module utils {
     class ArrayUtils {
         static areEqual(arr1: Array, arr2: Array): boolean;
     }
 }
 
-module "io" {
-    class FileSystem {
+export declare module io {
+    export class FileSystem {
         info: FileSystemInfo;
         dirSeparator: string;
         private _root: Directory;
@@ -44,13 +44,13 @@ module "io" {
         constructor(root_name: string, dir_sep?: string, info?: FileSystemInfo);
     }
 
-    class FileSystemInfo {
+    export class FileSystemInfo {
         capacity: number;       // Number of characters in local storage
 
         constructor(capacity?: number);
     }
 
-    class FileSystemNodeInfo {
+    export class FileSystemNodeInfo {
         name: string;
         created: number;
         modified: number;
@@ -60,25 +60,25 @@ module "io" {
         constructor(name: string, created?: number, modified?: number, accessed?: number, flags?: number);
     }
 
-    enum FileSystemNodeFlag {
+    export enum FileSystemNodeFlag {
         SYSTEM,
         EXECUTABLE,
         HIDDEN,
         SUPER_HIDDEN
     }
 
-    abstract class FileSystemNode {
+    export abstract class FileSystemNode {
         private info: FileSystemNodeInfo;
         parent: FileSystemNode;
 
         getPath(): string;
         getPathNodes(): Array;
-        setFlag(flag: FileSystemNodeFlag);
-        unsetFlag(flag: FileSystemNodeFlag);
+        setFlag(flag: FileSystemNodeFlag): void;
+        unsetFlag(flag: FileSystemNodeFlag): void;
         hasFlag(flag: FileSystemNodeFlag): boolean;
     }
 
-    class Directory extends FileSystemNode {
+    export class Directory extends FileSystemNode {
         _children: Object;
 
         getNode(filename: string): StatusObject;
@@ -87,13 +87,13 @@ module "io" {
         constructor(parent: Directory, info: FileSystemNodeInfo);
     }
 
-    class File extends FileSystemNode {
+    export class File extends FileSystemNode {
         data: string;
 
         constructor(parent: Directory, info: FileSystemNodeInfo, data?: string);
     }
 
-    class FileStream {
+    export class FileStream {
         private _file: File;
         private _pid: number;
         private _kernel: kernel.Kernel;
