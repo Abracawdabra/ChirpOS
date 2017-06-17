@@ -43,6 +43,7 @@ export declare module _os {
 
         getDirName(path: string): string;
         getBaseName(path: string): string;
+        join(components: arguments): string;
     }
 }
 
@@ -94,7 +95,7 @@ export declare module _io {
         constructor(name: string, created?: number, modified?: number, accessed?: number, flags?: number);
     }
 
-    export enum FileSystemNodeFlag {
+    export enum FileFlag {
         SYSTEM,
         EXECUTABLE,
         HIDDEN,
@@ -107,9 +108,9 @@ export declare module _io {
 
         getPath(): string;
         getPathNodes(): Array;
-        setFlag(flag: FileSystemNodeFlag): void;
-        unsetFlag(flag: FileSystemNodeFlag): void;
-        hasFlag(flag: FileSystemNodeFlag): boolean;
+        setFlag(flag: FileFlag): void;
+        unsetFlag(flag: FileFlag): void;
+        hasFlag(flag: FileFlag): boolean;
     }
 
     export class Directory extends FileSystemNode {
