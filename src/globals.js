@@ -18,6 +18,7 @@ global.StatusCode = {
     STREAM_IS_CLOSED: 6,
     FILE_IS_READ_LOCKED: 7,
     FILE_IS_WRITE_LOCKED: 8,
+    PROCESS_YIELD: 9
 };
 
 /**

@@ -1,10 +1,10 @@
 # The ChirpOS File System #
 
-The file system of ChirpOS is represented as an instance of the `io.FileSystem`
-class. This instance holds an `io.Directory` object; a regular directory, only
+The file system of ChirpOS is represented as an instance of the `_io.FileSystem`
+class. This instance holds an `_io.Directory` object; a regular directory, only
 with the file system being the parent. The root directory holds everything in
 the file system, which is made up of instances of classes that inherit
-`io.FileSystemNode`. Each of these objects is accessed by regular Javascript
+`_io.FileSystemNode`. Each of these objects is accessed by regular Javascript
 object keys(strings) in order to save time on lookups. The root directory can
 optionally have a name, like a drive letter would on Windows. By default, it has
 no name.
@@ -27,8 +27,8 @@ io.FileSystem
 ```
 
 ### Attributes ###
- All `io.FileSystemNode` objects have attributes associated with them through an
- `io.FileSystemNodeInfo` object. Attributes that are stored are:
+ All `_io.FileSystemNode` objects have attributes associated with them through an
+ `_io.FileSystemNodeInfo` object. Attributes that are stored are:
  + Name : string
  + Creation date : number
  + Last modified date : number
@@ -57,17 +57,17 @@ save space, the JSON string will be compressed using the
 [lz-string library](http://pieroxy.net/blog/pages/lz-string/index.html).
 
 ### File Streams ###
-Files are normally accessed and written to through `kernel.Kernel.write()`,
+Files are normally accessed and written to through `_kernel.Kernel.write()`,
 which causes the local storage operations to occur. Doing local storage write
-operations constantly might be a bit slow, so the `io.FileStream` class provides
-an abstraction layer with a write buffer, plus it automatically calls the
-kernel's write method with the process ID of the process it is currently
+operations constantly might be a bit slow, so the `_io.FileStream` class
+provides an abstraction layer with a write buffer, plus it automatically calls
+the kernel's write method with the process ID of the process it is currently
 attached to. The stream should however, be instantiated by using the
-`process.Process.openFile()` method so as to automate the process of error
+`_proc.Process.openFile()` method so as to automate the process of error
 checking or creating new files when necessary.
 
 This write buffer automatically flushes when it is full, and it also flushes
-when the `io.FileStream.close()` method is called when the stream is still
+when the `_io.FileStream.close()` method is called when the stream is still
 open.
 
 ### File Locking ###

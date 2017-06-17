@@ -5,8 +5,8 @@
  */
 "use strict";
 
-const io = require("io");
-const ArrayUtils = require("utils").ArrayUtils;
+const io = require("_io");
+const ArrayUtils = require("_utils").ArrayUtils;
 
 
 // Returns a fake kernel instance (mainly because it hasn't been written yet)
@@ -21,7 +21,6 @@ var getFakeKernel = function() {
 
 QUnit.test("Create file test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     assert.equal(root.getPath(), "/");
@@ -38,7 +37,6 @@ QUnit.test("Create file test", function(assert) {
 
 QUnit.test("Get node from path string test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"));
@@ -50,7 +48,6 @@ QUnit.test("Get node from path string test", function(assert) {
 
 QUnit.test("Create file within nested directories test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_dir = new io.Directory(root, new io.FileSystemNodeInfo("test_dir"));
@@ -72,10 +69,9 @@ QUnit.test("Create file within nested directories test", function(assert) {
 
 QUnit.test("Create files in system directory test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
-    var system_dir = new io.Directory(root, new io.FileSystemNodeInfo("system_dir", 0, 0, 0, io.FileSystemNodeFlag.SYSTEM));
+    var system_dir = new io.Directory(root, new io.FileSystemNodeInfo("system_dir", 0, 0, 0, io.FileFlag.SYSTEM));
     root.setNode(system_dir);
 
     // Non-user mode
@@ -91,7 +87,6 @@ QUnit.test("Create files in system directory test", function(assert) {
 
 QUnit.test("Delete nodes test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_dir = new io.Directory(root, new io.FileSystemNodeInfo("test_dir"));
@@ -103,10 +98,9 @@ QUnit.test("Delete nodes test", function(assert) {
 
 QUnit.test("Delete files from system directory test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
-    var system_dir = new io.Directory(root, new io.FileSystemNodeInfo("system_dir", 0, 0, 0, io.FileSystemNodeFlag.SYSTEM));
+    var system_dir = new io.Directory(root, new io.FileSystemNodeInfo("system_dir", 0, 0, 0, io.FileFlag.SYSTEM));
     assert.equal(root.setNode(system_dir), StatusCode.SUCCESS);
 
     // Non-user mode
@@ -124,26 +118,24 @@ QUnit.test("Delete files from system directory test", function(assert) {
 
 QUnit.test("Setting flags test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"));
-    test_file.setFlag(io.FileSystemNodeFlag.SYSTEM);
-    test_file.setFlag(io.FileSystemNodeFlag.EXECUTABLE);
-    assert.ok(test_file.hasFlag(io.FileSystemNodeFlag.SYSTEM), "Successfully set system flag");
-    assert.ok(test_file.hasFlag(io.FileSystemNodeFlag.EXECUTABLE), "Successfully set executable flag");
+    test_file.setFlag(io.FileFlag.SYSTEM);
+    test_file.setFlag(io.FileFlag.EXECUTABLE);
+    assert.ok(test_file.hasFlag(io.FileFlag.SYSTEM), "Successfully set system flag");
+    assert.ok(test_file.hasFlag(io.FileFlag.EXECUTABLE), "Successfully set executable flag");
 
-    test_file.unsetFlag(io.FileSystemNodeFlag.SYSTEM);
-    assert.equal(test_file.hasFlag(io.FileSystemNodeFlag.SYSTEM), false);
-    test_file.unsetFlag(io.FileSystemNodeFlag.EXECUTABLE);
-    assert.equal(test_file.hasFlag(io.FileSystemNodeFlag.EXECUTABLE), false);
+    test_file.unsetFlag(io.FileFlag.SYSTEM);
+    assert.equal(test_file.hasFlag(io.FileFlag.SYSTEM), false);
+    test_file.unsetFlag(io.FileFlag.EXECUTABLE);
+    assert.equal(test_file.hasFlag(io.FileFlag.EXECUTABLE), false);
 
     assert.equal(test_file.info.flags, 0);
 });
 
 QUnit.test("Read from file stream test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"), "Hello World!");
@@ -160,7 +152,6 @@ QUnit.test("Read from file stream test", function(assert) {
 
 QUnit.test("Read from file stream in write-only mode test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"), "Hello World!");
@@ -172,10 +163,9 @@ QUnit.test("Read from file stream in write-only mode test", function(assert) {
 
 QUnit.test("Read from system file with file stream test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
-    var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt", 0, 0, 0, io.FileSystemNodeFlag.SYSTEM), "Hello World!");
+    var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt", 0, 0, 0, io.FileFlag.SYSTEM), "Hello World!");
     assert.equal(root.setNode(test_file), StatusCode.SUCCESS);
 
     var stream = new io.FileStream(null, null, test_file, "r");
@@ -184,7 +174,6 @@ QUnit.test("Read from system file with file stream test", function(assert) {
 
 QUnit.test("Read line from file stream test", function(assert) {
     var fs = new io.FileSystem();
-    fs.dirSeparator = "/";
 
     var root = fs.getRoot();
     var test_file = new io.File(root, new io.FileSystemNodeInfo("test.txt"));

@@ -11,9 +11,21 @@ how much processing time they are allowed, and yield to the kernel whenever they
 want. Yielding gives other processes a chance to run so that the system can be
 one big happy family. So don't be greedy!
 
+Yielding is simply accomplished using this statement within `main()`:
+```javascript
+return new StatusObject(StatusCode.PROCESS_YIELD);
+```
+The process has to manually keep track of where it has left off, since the
+kernel will just call `main()` again when it returns to the process. Any other
+return code that is not `StatusCode.SUCCESS` or `StatusCode.PROCESS_YIELD` will
+be treated as an error code. Supply a string with the `StatusObject` result and
+it will be used as the error message instead of the error code. This helps so
+that you do not have to define a bunch of new global status codes for your
+processes.
+
 The shell yields at [to be decided], unless a child process is running. User
-scripts will automatically yielded by the shell  after certain statements, such
-as after one iteration of a loop.
+scripts will automatically be yielded by the shell after certain statements,
+such as after one iteration of a loop.
 
 ### Shared User Space ###
 
@@ -27,27 +39,27 @@ Processes can request read or write locks on files that don't have any owned by
 other processes. The kernel keeps track of the locks by file and process ID.
 When a process exits, all locks associated with it are destroyed.
 
-Use `kernel.Kernel.lockFile` to create a lock.
+Use `_kernel.Kernel.lockFile` to create a lock.
 
 ### Environment ###
 
 A process's environment is simply an ordinary Javascript object that acts as a
-hash of `env.Data` and `env.Function` objects. There are four data types to
+hash of `_env.Data` and `_env.Function` objects. There are four data types to
 use work with:
 + Integer - Whole numbers between 9007199254740991 and -9007199254740991
 + Float   - Floating point numbers
 + String  - Strings of characters
 + Array   - Arrays of data objects (literals are converted to objects)
 
-The `env.Data` class is directly used for variables(references to the data), but
+The `_env.Data` class is directly used for variables(references to the data), but
 may also be any kind of temporary piece of data that is placed on the stack.
-They are also used as return types with `env.Function` objects.
+They are also used as return types with `_env.Function` objects.
 
-Each `env.Function` object has its own little local environment, so that there
+Each `_env.Function` object has its own little local environment, so that there
 is no need to pollute the rest of the process environment. They have complete
 access to the process environment and even the shared user space environment.
 Along with the four data types, functions can have a return type of
-`env.DataType.VOID`.
+`_env.DataType.VOID`.
 
 ### Stack ###
 

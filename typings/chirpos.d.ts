@@ -27,13 +27,47 @@ export class StatusObject {
 export function getStatusMessage(status_code: StatusCode): string;
 export function inheritClass(child_class: any, parent_class: any);
 
-declare module utils {
-    class ArrayUtils {
+export declare module _utils {
+    export class ArrayUtils {
         static areEqual(arr1: Array, arr2: Array): boolean;
     }
 }
 
-export declare module io {
+export declare module _os {
+    ROOT_DIR_NAME: string;
+    FILE_SYSTEM_CAPACITY: number;
+    FILE_STREAM_BUFFER_SIZE: number;
+
+    export class path {
+        DIR_SEPARATOR: string;
+
+        getDirName(path: string): string;
+        getBaseName(path: string): string;
+    }
+}
+
+export declare module _log {
+    export enum LogLevel {
+        ERROR,
+        WARN,
+        INFO,
+        DEBUG
+    }
+
+    export function addLoggerMethod(obj: Object): void;
+
+    export class Logger {
+        level: LogLevel;
+
+        print(level: LogLevel, param2: string, param3?: string): void;
+        error(param1: string, param2?: string): void;
+        warn(param1: string, param2?: string): void;
+        info(param1: string, param2?: string): void;
+        debug(param1: string, param2?: string): void;
+    }
+}
+
+export declare module _io {
     export class FileSystem {
         info: FileSystemInfo;
         dirSeparator: string;
@@ -115,4 +149,20 @@ export declare module io {
         flush(): StatusCode;
         constructor(kernel: kernel.Kernel, pid: number, file: File, mode: string);
     }
+}
+
+export declare module _proc {
+    export declare class Process {
+        _kernel: kernel.Kernel;
+        _pid: number;
+
+        getPID(): number;
+        openFile(filename: string, mode: string): StatusObject;
+        abstract main(): StatusObject;
+        constructor(kernel: kernel.Kernel, pid: number);
+    }
+}
+
+export declare module _kernel {
+
 }
