@@ -18,7 +18,9 @@ global.StatusCode = {
     STREAM_IS_CLOSED: 6,
     FILE_IS_READ_LOCKED: 7,
     FILE_IS_WRITE_LOCKED: 8,
-    PROCESS_YIELD: 9
+    PROCESS_YIELD: 9,
+    NODE_IS_NOT_DIRECTORY: 10,
+    FILE_LOCK_NOT_FOUND: 11
 };
 
 /**
@@ -65,6 +67,10 @@ global.getStatusMessage = function(status_code) {
             return "File is currently read locked by another process";
         case FILE_IS_WRITE_LOCKED:
             return "File is currently write locked by another process";
+        case NODE_IS_NOT_DIRECTORY:
+            return "Node is not a directory";
+        case FILE_LOCK_NOT_FOUND:
+            return "File lock not found";
     }
 
     return "";

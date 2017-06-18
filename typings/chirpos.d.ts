@@ -13,7 +13,9 @@ export enum StatusCode {
     STREAM_NOT_IN_WRITE_MODE,
     STREAM_IS_CLOSED,
     FILE_IS_READ_LOCKED,
-    FILE_IS_WRITE_LOCKED
+    FILE_IS_WRITE_LOCKED,
+    NODE_IS_NOT_DIRECTORY,
+    FILE_LOCK_NOT_FOUND
 }
 
 export class StatusObject {
@@ -65,6 +67,23 @@ export declare module _log {
         warn(param1: string, param2?: string): void;
         info(param1: string, param2?: string): void;
         debug(param1: string, param2?: string): void;
+    }
+}
+
+export declare module _kernel {
+    export class Kernel {
+        _fileSystem: io.FileSystem;
+
+        createFile(pid: number, path: string, flags: number, user_mode: boolean): StatusObject;
+        makeDirs(pid: number, path: string, flags: number, user_mode: boolean): StatusObject;
+        openFile(pid: number, path: string, mode: string, user_mode: boolean): StatusObject;
+        findFileLocks(file: io.File): object;
+        canReadFrom(pid: number, file: io.File): boolean;
+        canWriteTo(pid: number, file: io.File): boolean;
+        readLockFile(pid: number, file: io.File, lock: boolean): StatusCode;
+        writeLockFile(pid: number, file: io.File, lock: boolean): StatusCode;
+        deleteFileLock(pid: number, file: io.File): StatusCode;
+        constructor();
     }
 }
 
