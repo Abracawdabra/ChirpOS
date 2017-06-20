@@ -77,9 +77,13 @@ export declare module _kernel {
         createFile(pid: number, path: string, flags: number, user_mode: boolean): StatusObject;
         makeDirs(pid: number, path: string, flags: number, user_mode: boolean): StatusObject;
         openFile(pid: number, path: string, mode: string, user_mode: boolean): StatusObject;
+        copyFile(pid: number, source_path: string, dest_path: string, user_mode: boolean): StatusObject;
+        deepCopyDir(pid: number, source: io.Directory, parent: io.Directory, new_name: string, user_mode: boolean): StatusObject;
         findFileLocks(file: io.File): object;
         canReadFrom(pid: number, file: io.File): boolean;
+        canReadFromSingle(pid: number, file: io.File): boolean;
         canWriteTo(pid: number, file: io.File): boolean;
+        canWriteToSingle(pid: number, file: io.File): boolean;
         readLockFile(pid: number, file: io.File, lock: boolean): StatusCode;
         writeLockFile(pid: number, file: io.File, lock: boolean): StatusCode;
         deleteFileLock(pid: number, file: io.File): StatusCode;

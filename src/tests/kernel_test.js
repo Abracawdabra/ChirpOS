@@ -167,3 +167,105 @@ QUnit.test("Lock directory test", function(assert) {
     status = k.openFile(2, file.getPath(), "w", true);
     assert.equal(status.code, StatusCode.FILE_IS_WRITE_LOCKED);
 });
+
+QUnit.test("Copy file test", function(assert) {
+    var k = new kernel.Kernel();
+    var status = k.createFile(1, os.path.join(os.ROOT_DIR_NAME, "test.txt"));
+    assert.equal(status.code, StatusCode.SUCCESS);
+    var file = status.result;
+    file.setFlag(io.FileFlag.HIDDEN);
+    file.data = "Hello World!";
+
+    status = k.copyFile(1, os.path.join(os.ROOT_DIR_NAME, "test.txt"), os.path.join(os.ROOT_DIR_NAME, "test_copy.txt"), true);
+    assert.equal(status.code, StatusCode.SUCCESS);
+    var file_copy = status.result;
+    assert.equal(file_copy.info.name, "test_copy.txt");
+    assert.equal(file.info.created, file_copy.info.created);
+    assert.equal(file.info.modified, file_copy.info.modified);
+    assert.equal(file.info.accessed, file_copy.info.accessed);
+    assert.equal(file.info.flags, file_copy.info.flags);
+    assert.equal(file.data, file_copy.data);
+});
+
+QUnit.test("Copy read locked file test", function(assert) {
+    var k = new kernel.Kernel();
+    var status = k.createFile(1, os.path.join(os.ROOT_DIR_NAME, "test.txt"));
+    assert.equal(status.code, StatusCode.SUCCESS);
+    var file = status.result;
+    assert.equal(k.readLockFile(1, file, true), StatusCode.SUCCESS);
+
+    status = k.copyFile(1, os.path.join(os.ROOT_DIR_NAME, "test.txt"), os.path.join(os.ROOT_DIR_NAME, "test_copy.txt"), true);
+    assert.equal(status.code, StatusCode.SUCCESS);
+
+    status = k.copyFile(2, os.path.join(os.ROOT_DIR_NAME, "test.txt"), os.path.join(os.ROOT_DIR_NAME, "test_copy2.txt"), true);
+    assert.equal(status.code, StatusCode.FILE_IS_READ_LOCKED);
+
+    // Parent directory lock
+    assert.equal(k.readLockFile(1, file, false), StatusCode.SUCCESS);
+    assert.equal(k.readLockFile(1, file.parent, true), StatusCode.SUCCESS);
+
+    status = k.copyFile(2, os.path.join(os.ROOT_DIR_NAME, "test.txt"), os.path.join(os.ROOT_DIR_NAME, "test_copy3.txt"), true);
+    assert.equal(status.code, StatusCode.FILE_IS_READ_LOCKED);
+});
+
+QUnit.test("Copy directory test", function(assert) {
+    var k = new kernel.Kernel();
+    var dirs = ["dir1", "dir2", "dir3"];
+    var status = k.makeDirs(1, os.path.join(os.ROOT_DIR_NAME, dirs.join(os.path.DIR_SEPARATOR)));
+    assert.equal(status.code, StatusCode.SUCCESS);
+
+
+    var i, j, path;
+    for (i=0; i<3; ++i) {
+        path = os.path.join(os.ROOT_DIR_NAME, dirs.slice(0, i + 1).join(os.path.DIR_SEPARATOR));
+        for (j=0; j<2; ++j) {
+            status = k.createFile(1, os.path.join(path, "test" + j + ".txt"), io.FileFlag.HIDDEN);
+            assert.equal(status.code, StatusCode.SUCCESS);
+            status.result.data = "Hello World! " + i + " " + j;
+        }
+    }
+
+    status = k.copyFile(1, os.path.join(os.ROOT_DIR_NAME, dirs[0]), os.path.join(os.ROOT_DIR_NAME, "dir1_copy"));
+    assert.equal(status.code, StatusCode.SUCCESS);
+
+    var copy_path, file1, file2;
+    for (i=0; i<3; ++i) {
+        path = os.path.join(os.ROOT_DIR_NAME, dirs.slice(0, i + 1).join(os.path.DIR_SEPARATOR));
+        copy_path = os.path.join(os.ROOT_DIR_NAME, "dir1_copy", dirs.slice(1, i + 1).join(os.path.DIR_SEPARATOR));
+        for (j=0; j<2; ++j) {
+            file1 = k.getFileSystem().getNodeFromPath(os.path.join(path, "test" + j + ".txt")).result;
+            file2 = k.getFileSystem().getNodeFromPath(os.path.join(copy_path, "test" + j + ".txt")).result;
+
+            assert.equal(file1.info.name, file2.info.name);
+            assert.equal(file1.info.created, file2.info.created);
+            assert.equal(file1.info.modified, file2.info.modified);
+            assert.equal(file1.info.accessed, file2.info.accessed);
+            assert.equal(file1.info.flags, file2.info.flags);
+            assert.equal(file1.data, file2.data);
+        }
+    }
+});
+
+QUnit.test("Copy locked directory test", function(assert) {
+    var k = new kernel.Kernel();
+    var status = k.makeDirs(1, os.path.join(os.ROOT_DIR_NAME, "dir1", "dir2"));
+    assert.equal(status.code, StatusCode.SUCCESS);
+
+    var dir = status.result;
+    assert.equal(k.readLockFile(1, dir, true), StatusCode.SUCCESS);
+
+    status = k.copyFile(2, dir.getPath(), os.path.join(os.ROOT_DIR_NAME, "dir2_copy"), true);
+    assert.equal(status.code, StatusCode.FILE_IS_READ_LOCKED);
+
+    // Try copying with the parent locked
+    assert.equal(k.deleteFileLock(1, dir), StatusCode.SUCCESS);
+    assert.equal(k.readLockFile(1, dir.parent, true), StatusCode.SUCCESS);
+    status = k.copyFile(2, dir.getPath(), os.path.join(os.ROOT_DIR_NAME, "dir2_copy"), true);
+    assert.equal(status.code, StatusCode.FILE_IS_READ_LOCKED);
+
+    // Try copying with the destination directory write locked
+    assert.equal(k.deleteFileLock(1, dir.parent), StatusCode.SUCCESS);
+    assert.equal(k.writeLockFile(1, k.getFileSystem().getRoot(), true), StatusCode.SUCCESS);
+    status = k.copyFile(2, dir.getPath(), os.path.join(os.ROOT_DIR_NAME, "dir2_copy"), true);
+    assert.equal(status.code, StatusCode.FILE_IS_WRITE_LOCKED);
+});
